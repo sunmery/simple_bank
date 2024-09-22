@@ -23,11 +23,11 @@ postgres-drop-db:
 
 # 升级迁移, 先安装https://github.com/golang-migrate/migrate/tree/master
 migrate-up:
-	migrate -database "postgres://postgres:postgres@localhost:5432/simple_bank?sslmode=disable" -path db/migrate -verbose up
+	migrate -database "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable" -path db/migrate -verbose up
 
 # 降级迁移文件, 先安装https://github.com/golang-migrate/migrate/tree/master
 migrate-down:
-	migrate -database "postgres://postgres:postgres@localhost:5432/simple_bank?sslmode=disable" -path db/migrate -verbose down
+	migrate -database "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable" -path db/migrate -verbose down
 
 # go test
 test:
