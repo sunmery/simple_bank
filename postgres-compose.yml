@@ -15,6 +15,7 @@ services:
       POSTGRES_PASSWORD: postgres
       # 此可选环境变量可用于为首次启动映像时创建的默认数据库定义不同的名称。如果未指定，则将使用 POSTGRES_USER 的值。
       POSTGRES_DB: postgres
+
     #volumes:
     #  - type: tmpfs
     #    target: /dev/shm
