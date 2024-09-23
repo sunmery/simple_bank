@@ -40,4 +40,7 @@ postgres-first:
 postgres-restart:
 	make migrate-down && make migrate-up
 
-.PHONY: sqlc postgres-up postgres-down postgres-create-db postgres-drop-db migrate-up migrate-down test
+server:
+	go run main.go
+
+.PHONY: sqlc postgres-up postgres-down postgres-create-db postgres-drop-db migrate-up migrate-down test server

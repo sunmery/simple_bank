@@ -1,0 +1,11 @@
+### Creates Account
+PUT {{url}}/accounts
+Content-Type: application/json
+
+{
+  "owner": "lixia",
+  "currency": "USD"
+}
+
+### Ping
+GET localhost:8080/ping

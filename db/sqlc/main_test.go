@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	url = "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable"
+	dbSource = "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable"
 )
 
 var (
@@ -20,7 +20,7 @@ var (
 
 func TestMain(m *testing.M) {
 	var err error
-	testDB, err = pgxpool.New(context.Background(), url)
+	testDB, err = pgxpool.New(context.Background(), dbSource)
 	if err != nil {
 		log.Fatalf("Unable to create connection pool: %v\n", err)
 	}
