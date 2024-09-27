@@ -21,13 +21,21 @@ postgres-create-db:
 postgres-drop-db:
 	docker exec -it postgres15 dropdb simple_bank --username postgres
 
-# 升级迁移, 先安装https://github.com/golang-migrate/migrate/tree/master
+# 升级全部的迁移文件, 先安装https://github.com/golang-migrate/migrate/tree/master
 migrate-up:
 	migrate -database "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable" -path db/migrate -verbose up
 
-# 降级迁移文件, 先安装https://github.com/golang-migrate/migrate/tree/master
+# 向上迁移一个版本, 根据数据库的表schema_migrations的version来决定
+migrate-up1:
+	migrate -database "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable" -path db/migrate -verbose up 1
+
+# 向下全部降级迁移文件, 先安装https://github.com/golang-migrate/migrate/tree/master
 migrate-down:
 	migrate -database "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable" -path db/migrate -verbose down
+
+# 向下降级一个版本, 根据数据库的表schema_migrations的version来决定
+migrate-down1:
+	migrate -database "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable" -path db/migrate -verbose down 1
 
 # go test
 test:
@@ -40,7 +48,12 @@ postgres-first:
 postgres-restart:
 	make migrate-down && make migrate-up
 
+# Web Server Start
 server:
 	go run main.go
 
-.PHONY: sqlc postgres-up postgres-down postgres-create-db postgres-drop-db migrate-up migrate-down test server
+# Mock DB
+mock:
+	mockgen -package mockdb -destination db/mock/store.go simple_bank/db/sqlc Store
+
+.PHONY: sqlc postgres-up postgres-down postgres-create-db postgres-drop-db migrate-up migrate-up1 migrate-down migrate-down1 test server mock

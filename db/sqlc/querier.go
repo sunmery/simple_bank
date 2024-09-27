@@ -34,6 +34,15 @@ type Querier interface {
 	//  VALUES ($1, $2, $3)
 	//  RETURNING id, from_account_id, to_account_id, amount, created_at
 	CreateTransfer(ctx context.Context, arg CreateTransferParams) (Transfers, error)
+	//CreateUser
+	//
+	//  INSERT INTO users (username,
+	//                     full_name,
+	//                     hashed_password,
+	//                     email)
+	//  VALUES ($1, $2, $3, $4)
+	//  RETURNING username, full_name, hashed_password, email, password_changed_at, created_at, updated_at
+	CreateUser(ctx context.Context, arg CreateUserParams) (Users, error)
 	//DeleteAccount
 	//
 	//  DELETE FROM accounts
@@ -67,14 +76,20 @@ type Querier interface {
 	//  WHERE id = $1
 	//  LIMIT 1
 	GetTransfer(ctx context.Context, id int64) (Transfers, error)
+	//GetUser
+	//
+	//  SELECT username, full_name, hashed_password, email, password_changed_at, created_at, updated_at
+	//  FROM users
+	//  WHERE username = $1
+	//  LIMIT 1
+	GetUser(ctx context.Context, username string) (Users, error)
 	//ListAccounts
 	//
 	//  SELECT id, owner, balance, currency, created_at
 	//  FROM accounts
-	//  WHERE owner = $1
 	//  ORDER BY id
-	//  LIMIT $2
-	//  OFFSET $3
+	//  LIMIT $1
+	//  OFFSET $2
 	ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Accounts, error)
 	//ListEntry
 	//

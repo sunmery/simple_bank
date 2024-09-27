@@ -8,20 +8,25 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Store struct {
+type Store interface {
+	Querier
+	TransferTx(ctx context.Context, arg TransfersParams) (TransfersTxResult, error)
+}
+
+type SQLStore struct {
 	*Queries
 	db *pgxpool.Pool
 }
 
-func NewStore(db *pgxpool.Pool) *Store {
-	return &Store{
+func NewStore(db *pgxpool.Pool) Store {
+	return &SQLStore{
 		db:      db,
 		Queries: New(db),
 	}
 }
 
 // execTx 通用的事务方法, 通过外部传递函数作为事务的运行内容
-func (s *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+func (s *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
 	// 开始一个事务, 如sql的begin
 	tx, err := s.db.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -64,7 +69,7 @@ type TransfersTxResult struct {
 // 3. 条目表记录一条数据, 记录用户转入的金额
 // 4. 账户表记录一条数据, 记录账户的转出
 // 5. 账户表记录一条数据, 记录账户的转入
-func (s *Store) TransferTx(ctx context.Context, arg TransfersParams) (TransfersTxResult, error) {
+func (s *SQLStore) TransferTx(ctx context.Context, arg TransfersParams) (TransfersTxResult, error) {
 	var result TransfersTxResult
 
 	// 执行转账事务
@@ -103,39 +108,17 @@ func (s *Store) TransferTx(ctx context.Context, arg TransfersParams) (TransfersT
 		// 否则在并发时会引发这种情况: 事务1需要修改事务2中的行时,需要等待事务2提交或回滚, 事务2也操作了事务1中的行也要等待事务1提交或回滚 造成死锁
 		// 因为在遇到UPDATE更新时, 数据库默认自动给该事务添加行级排它锁,
 		// 它会阻止其它事务对该行的修改操作(但不影响查询)
-		// if arg.FromAccountID > arg.ToAccountID {
-		// 	// 直接更新余额, 将查询该账户获取该账号的id与账号更新余额合并为一个方法
-		// 	result.FromAccount, result.ToAccount, err = addMoney(ctx, q, arg.FromAccountID, -arg.Amount, arg.ToAccountID, arg.Amount)
-		// 	if err != nil {
-		// 		return err
-		// 	}
-		// } else {
-		// 	result.ToAccount, result.FromAccount, err = addMoney(ctx, q, arg.ToAccountID, arg.Amount, arg.FromAccountID, -arg.Amount)
-		// 	if err != nil {
-		// 		return err
-		// 	}
-		// }
 		if arg.FromAccountID < arg.ToAccountID {
 			// 直接更新余额, 将查询该账户获取该账号的id与账号更新余额合并为一个方法
-			result.FromAccount, err = q.AddAccountBalancer(ctx, AddAccountBalancerParams{
-				Amount: -arg.Amount,
-				ID:     arg.FromAccountID,
-			})
-
-			result.ToAccount, err = q.AddAccountBalancer(ctx, AddAccountBalancerParams{
-				Amount: arg.Amount,
-				ID:     arg.ToAccountID,
-			})
+			result.FromAccount, result.ToAccount, err = addMoney(ctx, q, arg.FromAccountID, -arg.Amount, arg.ToAccountID, arg.Amount)
+			if err != nil {
+				return err
+			}
 		} else {
-			result.ToAccount, err = q.AddAccountBalancer(ctx, AddAccountBalancerParams{
-				Amount: arg.Amount,
-				ID:     arg.ToAccountID,
-			})
-			// 直接更新余额, 将查询该账户获取该账号的id与账号更新余额合并为一个方法
-			result.FromAccount, err = q.AddAccountBalancer(ctx, AddAccountBalancerParams{
-				Amount: -arg.Amount,
-				ID:     arg.FromAccountID,
-			})
+			result.ToAccount, result.FromAccount, err = addMoney(ctx, q, arg.ToAccountID, arg.Amount, arg.FromAccountID, -arg.Amount)
+			if err != nil {
+				return err
+			}
 		}
 		return err
 	})

@@ -6,11 +6,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-)
+	"simple_bank/config"
 
-const (
-	dbSource = "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var (
@@ -19,8 +17,12 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	var err error
-	testDB, err = pgxpool.New(context.Background(), dbSource)
+	cfg, err := config.LoadConfig("../..")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	testDB, err = pgxpool.New(context.Background(), cfg.DBSource)
 	if err != nil {
 		log.Fatalf("Unable to create connection pool: %v\n", err)
 	}

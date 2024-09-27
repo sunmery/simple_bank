@@ -1,4 +1,4 @@
--- 账户表: 用户的基本信息
+-- 账户表: 用户的基本信息, 一个账户只能属于一个用户
 CREATE TABLE accounts
 (
     id         bigserial PRIMARY KEY,

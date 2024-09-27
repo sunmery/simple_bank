@@ -1,4 +1,4 @@
-### Creates Account
+### Create Account
 PUT {{url}}/accounts
 Content-Type: application/json
 
@@ -7,5 +7,10 @@ Content-Type: application/json
   "currency": "USD"
 }
 
-### Ping
-GET localhost:8080/ping
+### Get Account
+GET {{url}}/accounts/1
+
+### Get Accounts
+### page_id: 页数
+### page_size: 每页返回的数量
+GET {{url}}/accounts?page_id=2&page_size=5
