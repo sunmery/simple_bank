@@ -68,12 +68,10 @@ func (q *Queries) GetTransfer(ctx context.Context, id int64) (Transfers, error) 
 const ListTransfers = `-- name: ListTransfers :many
 SELECT id, from_account_id, to_account_id, amount, created_at
 FROM transfers
-WHERE
-    from_account_id = $1 OR
-    to_account_id = $2
+WHERE from_account_id = $1
+   OR to_account_id = $2
 ORDER BY id
-LIMIT $3
-OFFSET $4
+LIMIT $3 OFFSET $4
 `
 
 type ListTransfersParams struct {
@@ -87,12 +85,10 @@ type ListTransfersParams struct {
 //
 //	SELECT id, from_account_id, to_account_id, amount, created_at
 //	FROM transfers
-//	WHERE
-//	    from_account_id = $1 OR
-//	    to_account_id = $2
+//	WHERE from_account_id = $1
+//	   OR to_account_id = $2
 //	ORDER BY id
-//	LIMIT $3
-//	OFFSET $4
+//	LIMIT $3 OFFSET $4
 func (q *Queries) ListTransfers(ctx context.Context, arg ListTransfersParams) ([]Transfers, error) {
 	rows, err := q.db.Query(ctx, ListTransfers,
 		arg.FromAccountID,

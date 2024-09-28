@@ -8,13 +8,14 @@ import (
 	"simple_bank/pkg"
 )
 
+var testQueries *Queries
+
 func TestCreateUser(t *testing.T) {
 	createRandomUser(t)
 }
 
 func TestGetUser(t *testing.T) {
 	user1 := createRandomUser(t)
-
 	user, err := testQueries.GetUser(context.Background(), user1.Username)
 	require.NoError(t, err)
 	require.NotEmpty(t, user)

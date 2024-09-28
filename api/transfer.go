@@ -39,6 +39,7 @@ func (s *Server) createTransfer(ctx *gin.Context) {
 		ToAccountID:   req.ToAccountID,
 		Amount:        req.Amount,
 	})
+	fmt.Printf("result:%v", result)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": errorResponse(err)})
 		return
@@ -61,7 +62,7 @@ func (s *Server) validateCurrent(ctx *gin.Context, accountID int64, currency str
 		return false
 	}
 	if currency != toAccount.Currency {
-		ctx.JSON(http.StatusBadRequest, gin.H{
+		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{
 			"message": "转账时请使用相同的货币类型",
 			"error":   fmt.Sprintf("用户ID'%d' 的货币类型不匹配: '%s' vs '%s'", accountID, currency, toAccount.Currency),
 		})

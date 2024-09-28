@@ -67,8 +67,7 @@ SELECT id, account_id, amount, created_at
 FROM entries
 WHERE account_id = $1
 ORDER BY id
-LIMIT $2
-OFFSET $3
+LIMIT $2 OFFSET $3
 `
 
 type ListEntryParams struct {
@@ -83,8 +82,7 @@ type ListEntryParams struct {
 //	FROM entries
 //	WHERE account_id = $1
 //	ORDER BY id
-//	LIMIT $2
-//	OFFSET $3
+//	LIMIT $2 OFFSET $3
 func (q *Queries) ListEntry(ctx context.Context, arg ListEntryParams) ([]Entries, error) {
 	rows, err := q.db.Query(ctx, ListEntry, arg.AccountID, arg.Limit, arg.Offset)
 	if err != nil {

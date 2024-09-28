@@ -176,16 +176,135 @@ func TestCreateUserAPI(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			// 解构body io流的body data为JSON
 			body, err := json.Marshal(tc.body)
 			require.NoError(t, err)
+			data := bytes.NewReader(body)
 
 			// test uses api
 			url := "/users"
-			request, readErr := http.NewRequest(http.MethodPut, url, bytes.NewReader(body))
+			request, readErr := http.NewRequest(http.MethodPut, url, data)
+			require.NoError(t, readErr)
+
+			server.router.ServeHTTP(recorder, request)
+
+			tc.checkResponse(recorder)
+		})
+	}
+}
+
+// TODO TestGetUserAPI
+func TestGetUserAPI(t *testing.T) {
+	user, password := randomUser(t)
+	require.NotEmpty(t, password)
+	require.NotEmpty(t, user)
+
+	testCases := []struct {
+		name          string
+		body          gin.H
+		buildStubs    func(store *mockdb.MockStore)
+		checkResponse func(recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name: "OK",
+			body: gin.H{
+				"username": user.Username,
+				"fullName": user.FullName,
+				"password": password,
+				"email":    user.Email,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				arg := db.CreateUserParams{
+					Username:       user.Username,
+					FullName:       user.FullName,
+					HashedPassword: user.HashedPassword,
+					Email:          user.Email,
+				}
+				store.EXPECT().
+					CreateUser(gomock.Any(), EqCreateUserParams(arg, password)).
+					Times(1).
+					Return(db.Users{}, nil)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
+		{
+			name: "Password Length < 6",
+			body: gin.H{
+				"username": "mike",
+				"password": "mike1",
+				"fullName": "Mike",
+				"email":    "mike@example.com",
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					CreateUser(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
+			name: "Bad email",
+			body: gin.H{
+				"username": "mike",
+				"password": "mike1",
+				"fullName": "Mike",
+				"email":    "mike example.com",
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					CreateUser(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
+			name: "Create duplicate users",
+			body: gin.H{
+				"username": "mike",
+				"password": "mike1",
+				"fullName": "Mike",
+				"email":    "mike@example.com",
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					CreateUser(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			store := mockdb.NewMockStore(ctrl)
+			tc.buildStubs(store)
+
+			server := newTestServer(t, store)
+			recorder := httptest.NewRecorder()
+
+			// 解构body io流的body data为JSON
+			body, err := json.Marshal(tc.body)
+			require.NoError(t, err)
+			data := bytes.NewReader(body)
+
+			// test uses api
+			url := "/users"
+			request, readErr := http.NewRequest(http.MethodPut, url, data)
 			require.NoError(t, readErr)
 
 			server.router.ServeHTTP(recorder, request)

@@ -10,8 +10,6 @@ import (
 )
 
 func TestTransferTx(t *testing.T) {
-	store := NewStore(testDB)
-
 	account1 := createRandomAccount(t)
 	account2 := createRandomAccount(t)
 	fmt.Printf("交易前的余额: account1 :%d, account2: %d \n", account1.Balance, account2.Balance)
@@ -24,7 +22,7 @@ func TestTransferTx(t *testing.T) {
 
 	for i := 0; i < n; i++ {
 		go func() {
-			result, err := store.TransferTx(context.Background(), TransfersParams{
+			result, err := testStore.TransferTx(context.Background(), TransfersParams{
 				FromAccountID: account1.ID,
 				ToAccountID:   account2.ID,
 				Amount:        amount,

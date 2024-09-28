@@ -2,9 +2,9 @@
 CREATE TABLE users
 (
     username            varchar PRIMARY KEY,
-    full_name           varchar                      NOT NULL,
-    hashed_password     varchar                      NOT NULL,
-    email               varchar UNIQUE               NOT NULL,
+    full_name           varchar                     NOT NULL,
+    hashed_password     varchar                     NOT NULL,
+    email               varchar UNIQUE              NOT NULL,
     password_changed_at timestamptz DEFAULT (now()) NOT NULL,
     created_at          timestamptz DEFAULT (now()) NOT NULL,
     updated_at          timestamptz DEFAULT (now()) NOT NULL

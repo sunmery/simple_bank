@@ -17,13 +17,20 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	conn, err := pgxpool.New(context.Background(), cfg.DBSource)
-	if err != nil {
+
+	conn, newDBErr := pgxpool.New(context.Background(), cfg.DBSource)
+	if newDBErr != nil {
 		panic(fmt.Sprintf("Unable to connect to database: %v", err))
 	}
 
 	store := db.NewStore(conn)
-	server := api.NewServer(store)
+	server, newServerErr := api.NewServer(cfg, store)
+	if newServerErr != nil {
+		panic(fmt.Sprintf("Unable to create server: %v", err))
+	}
 
 	err = server.Start(cfg.ServerAddress)
+	if err != nil {
+		panic(fmt.Sprintf("Unable to start server: %v", err))
+	}
 }

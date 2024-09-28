@@ -26,7 +26,7 @@ CREATE TABLE transfers
     from_account_id bigint REFERENCES accounts (id) NOT NULL, -- 发出转账的账户id
     to_account_id   bigint REFERENCES accounts (id) NOT NULL, -- 接收转账的账户id
     amount          bigint                          NOT NULL, -- 转账的金额, 必须是正数
-    created_at      timestamptz DEFAULT (now())     NOT NULL -- 转账创建的时间
+    created_at      timestamptz DEFAULT (now())     NOT NULL  -- 转账创建的时间
 );
 
 CREATE INDEX accounts_owner ON accounts (owner);

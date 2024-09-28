@@ -8,7 +8,7 @@ ORDER BY id;
 SELECT *
 FROM accounts
 WHERE id = $1
-FOR NO KEY UPDATE;
+    FOR NO KEY UPDATE;
 
 -- name: CreateAccount :one
 INSERT INTO accounts(owner, balance, currency)
@@ -28,12 +28,12 @@ WHERE id = sqlc.arg(id)
 RETURNING *;
 
 -- name: DeleteAccount :exec
-DELETE FROM accounts
+DELETE
+FROM accounts
 WHERE id = $1;
 
 -- name: ListAccounts :many
 SELECT *
 FROM accounts
 ORDER BY id
-LIMIT $1
-OFFSET $2;
+LIMIT $1 OFFSET $2;

@@ -71,13 +71,15 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (A
 }
 
 const DeleteAccount = `-- name: DeleteAccount :exec
-DELETE FROM accounts
+DELETE
+FROM accounts
 WHERE id = $1
 `
 
 // DeleteAccount
 //
-//	DELETE FROM accounts
+//	DELETE
+//	FROM accounts
 //	WHERE id = $1
 func (q *Queries) DeleteAccount(ctx context.Context, id int64) error {
 	_, err := q.db.Exec(ctx, DeleteAccount, id)
@@ -114,7 +116,7 @@ const GetAccountForUpdate = `-- name: GetAccountForUpdate :one
 SELECT id, owner, balance, currency, created_at
 FROM accounts
 WHERE id = $1
-FOR NO KEY UPDATE
+    FOR NO KEY UPDATE
 `
 
 // GetAccountForUpdate
@@ -122,7 +124,7 @@ FOR NO KEY UPDATE
 //	SELECT id, owner, balance, currency, created_at
 //	FROM accounts
 //	WHERE id = $1
-//	FOR NO KEY UPDATE
+//	    FOR NO KEY UPDATE
 func (q *Queries) GetAccountForUpdate(ctx context.Context, id int64) (Accounts, error) {
 	row := q.db.QueryRow(ctx, GetAccountForUpdate, id)
 	var i Accounts
@@ -140,8 +142,7 @@ const ListAccounts = `-- name: ListAccounts :many
 SELECT id, owner, balance, currency, created_at
 FROM accounts
 ORDER BY id
-LIMIT $1
-OFFSET $2
+LIMIT $1 OFFSET $2
 `
 
 type ListAccountsParams struct {
@@ -154,8 +155,7 @@ type ListAccountsParams struct {
 //	SELECT id, owner, balance, currency, created_at
 //	FROM accounts
 //	ORDER BY id
-//	LIMIT $1
-//	OFFSET $2
+//	LIMIT $1 OFFSET $2
 func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Accounts, error) {
 	rows, err := q.db.Query(ctx, ListAccounts, arg.Limit, arg.Offset)
 	if err != nil {

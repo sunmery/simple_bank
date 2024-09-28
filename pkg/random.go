@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
+
+	"simple_bank/constant"
 )
 
 const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -33,7 +35,7 @@ func RandomString(n int) string {
 
 // RandomCurrency 随机生成货币类型
 func RandomCurrency() string {
-	currency := []string{"CNY", "USD", "EDR"}
+	currency := []string{constant.CAD, constant.USD, constant.CNY}
 	return currency[rand.Intn(len(currency))]
 }
 
