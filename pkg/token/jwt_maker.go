@@ -13,7 +13,6 @@ import (
 const jwtSecretKeyMinLength = 32
 
 var (
-	ErrInvalidToken = errors.New("invalid token")
 	ErrExpiredToken = errors.New("token has invalid claims: token is expired")
 	ErrTokenAlgNone = errors.New("token signature is invalid: token is unverifiable: 'none' signature type is not allowed")
 )
@@ -30,8 +29,9 @@ func NewJWTMaker(secretKey string) (Maker, error) {
 }
 
 // CreateToken 用户名与过期时间, 对特定用户的令牌或有效时期进行颁发
-func (maker JWTMaker) CreateToken(id uuid.UUID, username string, duration time.Duration) (string, error) {
-	claims, err := NewPayload(id, username, duration)
+func (maker JWTMaker) CreateToken(username string, duration time.Duration) (string, error) {
+	tokenID := uuid.New()
+	claims, err := NewPayload(tokenID, username, duration)
 	if err != nil {
 		return "", err
 	}

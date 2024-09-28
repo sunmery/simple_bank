@@ -34,9 +34,8 @@ func NewServer(config *config.Config, store db.Store) (*Server, error) {
 		store:     store,
 		tokenMake: tokenMaker,
 	}
-	gin.SetMode(gin.ReleaseMode)
-	router := gin.Default()
-	router.Use(middleware.Cors())
+
+	server.setupRouter()
 
 	if validate, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		err := validate.RegisterValidation("currency", validCurrency)
@@ -45,27 +44,32 @@ func NewServer(config *config.Config, store db.Store) (*Server, error) {
 		}
 	}
 
+	return server, nil
+}
+
+func (s *Server) setupRouter() {
+	gin.SetMode(gin.ReleaseMode)
+	routes := gin.Default()
+	routes.Use(middleware.Cors())
 	// 创建单个用户
-	router.PUT("/users", server.CreateUser)
+	routes.PUT("/users", s.CreateUser)
 	// 查询单个用户
-	router.GET("/users", server.GetUser)
+	routes.GET("/users", s.GetUser)
 
 	// 用户登录
-	router.POST("/users/login", server.loginUser)
+	routes.POST("/users/login", s.loginUser)
 
 	// 创建单个账户
-	router.PUT("/accounts", server.createAccount)
+	routes.PUT("/accounts", s.createAccount)
 	// 获取单个账户信息
-	router.GET("/accounts/:id", server.getAccount)
+	routes.GET("/accounts/:id", s.getAccount)
 	// 获取账户列表信息
-	router.GET("/accounts", server.listAccount)
+	routes.GET("/accounts", s.listAccount)
 
 	// 创建转账记录
-	router.PUT("/transfers", server.createTransfer)
+	routes.PUT("/transfers", s.createTransfer)
 
-	server.router = router
-
-	return server, nil
+	s.router = routes
 }
 
 // Start 启动

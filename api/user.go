@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/google/uuid"
-
 	"github.com/jackc/pgx/v5/pgconn"
 
 	"simple_bank/pkg"
@@ -88,8 +86,9 @@ func (s *Server) GetUser(ctx *gin.Context) {
 
 	user, queryErr := s.store.GetUser(ctx, req.Username)
 	if queryErr != nil {
-		if errors.As(queryErr, &sql.ErrNoRows) {
+		if errors.Is(queryErr, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(queryErr))
+			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(queryErr))
 		return
@@ -154,8 +153,7 @@ func (s *Server) loginUser(ctx *gin.Context) {
 	}
 
 	// 颁发token
-	tokenID := uuid.New()
-	token, createErr := s.tokenMake.CreateToken(tokenID, user.Username, s.config.AccessTokenDuration)
+	token, createErr := s.tokenMake.CreateToken(user.Username, s.config.AccessTokenDuration)
 	if createErr != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

@@ -9,13 +9,18 @@ import (
 	"github.com/o1egl/paseto"
 )
 
+var (
+	ErrInvalidToken = errors.New("token is invalid")
+)
+
 type PasetoMaker struct {
 	paseto       *paseto.V2
 	symmetricKey []byte
 }
 
-func (p PasetoMaker) CreateToken(id uuid.UUID, username string, duration time.Duration) (string, error) {
-	payload, err := NewPayload(id, username, duration)
+func (p PasetoMaker) CreateToken(username string, duration time.Duration) (string, error) {
+	tokenID := uuid.New()
+	payload, err := NewPayload(tokenID, username, duration)
 	if err != nil {
 		return "", err
 	}
@@ -31,7 +36,12 @@ func (p PasetoMaker) VerifyToken(token string) (*Payload, error) {
 
 	err := p.paseto.Decrypt(token, p.symmetricKey, payload, nil)
 	if err != nil {
-		return nil, err
+		return nil, ErrInvalidToken
+	}
+
+	err = payload.Valid()
+	if err != nil {
+		return nil, ErrExpiredToken
 	}
 
 	return payload, nil

@@ -11,6 +11,7 @@ import (
 type Payload struct {
 	ID       uuid.UUID `json:"id"`
 	Username string    `json:"username"`
+
 	jwt.RegisteredClaims
 }
 
@@ -21,6 +22,7 @@ func NewPayload(id uuid.UUID, username string, duration time.Duration) (*Payload
 	payload := &Payload{
 		ID:       id,
 		Username: username,
+
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(duration)),
 			NotBefore: jwt.NewNumericDate(time.Now()),
@@ -30,4 +32,12 @@ func NewPayload(id uuid.UUID, username string, duration time.Duration) (*Payload
 	}
 
 	return payload, nil
+}
+
+// Valid 校验Token是否过期
+func (payload *Payload) Valid() error {
+	if time.Now().After(payload.RegisteredClaims.ExpiresAt.Time) {
+		return ErrExpiredToken
+	}
+	return nil
 }

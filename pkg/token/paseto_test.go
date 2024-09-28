@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"simple_bank/pkg"
 )
@@ -37,14 +36,10 @@ func createToken(t *testing.T) string {
 	require.NotNil(t, maker)
 	require.NotEmpty(t, maker)
 
-	tokenID := uuid.New()
 	username := pkg.RandomString(5)
-	token, err := maker.CreateToken(tokenID, username, time.Minute)
+	token, err := maker.CreateToken(username, time.Minute*2)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
-	t.Log("tokenID", tokenID)
-	t.Log("username", username)
-	t.Log(token)
 
 	return token
 }

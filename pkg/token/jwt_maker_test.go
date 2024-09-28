@@ -92,8 +92,8 @@ func randomCreateToken(t *testing.T, username string, duration time.Duration) st
 	maker := &JWTMaker{
 		secretKey: []byte(secretKey),
 	}
-	tokenID := uuid.New()
-	token, err := maker.CreateToken(tokenID, username, duration)
+
+	token, err := maker.CreateToken(username, duration)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 	return token
