@@ -51,23 +51,27 @@ func (s *Server) setupRouter() {
 	gin.SetMode(gin.ReleaseMode)
 	routes := gin.Default()
 	routes.Use(middleware.Cors())
+
 	// 创建单个用户
 	routes.PUT("/users", s.CreateUser)
-	// 查询单个用户
-	routes.GET("/users", s.GetUser)
 
 	// 用户登录
 	routes.POST("/users/login", s.loginUser)
 
+	// 查询单个用户
+	authGroup := routes.Group("/auth").Use(middleware.AuthWebTokenMiddleware(s.tokenMake))
+
+	authGroup.GET("/users", s.GetUser)
+
 	// 创建单个账户
-	routes.PUT("/accounts", s.createAccount)
+	authGroup.PUT("/accounts", s.createAccount)
 	// 获取单个账户信息
-	routes.GET("/accounts/:id", s.getAccount)
+	authGroup.GET("/accounts/:id", s.getAccount)
 	// 获取账户列表信息
-	routes.GET("/accounts", s.listAccount)
+	authGroup.GET("/accounts", s.listAccount)
 
 	// 创建转账记录
-	routes.PUT("/transfers", s.createTransfer)
+	authGroup.PUT("/transfers", s.createTransfer)
 
 	s.router = routes
 }

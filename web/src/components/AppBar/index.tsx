@@ -1,5 +1,4 @@
 import * as React from "react";
-import { useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -13,21 +12,10 @@ import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
-import { useQuery } from "@tanstack/react-query";
 
 const pages = ["Products", "Pricing", "Blog"];
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
-type LoginResponse = {
-  User: {
-    username: string;
-    fullName: string;
-    email: string;
-    passwordChangedAt: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-  AccessToken: "";
-};
+
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null,
@@ -50,30 +38,6 @@ function ResponsiveAppBar() {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
-  const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const getUser = async (username: string, password: string) => {
-    try {
-      const res = await fetch("http://localhost:8080/users", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-      const data: LoginResponse = await res.json();
-      return data;
-    } catch (error) {
-      throw new Error(error);
-    }
-  };
-
-  const { isError, data, error } = useQuery({
-    queryKey: ["login", username, password],
-    queryFn: () => getUser(username, password),
-  });
-
-  if (isError) {
-    return <span>Error: {error.message}</span>;
-  }
 
   return (
     <AppBar position="static">
@@ -165,10 +129,7 @@ function ResponsiveAppBar() {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar
-                  alt={data?.username}
-                  src="/static/images/avatar/2.jpg"
-                />
+                <Avatar alt={""} src="/static/images/avatar/2.jpg" />
               </IconButton>
             </Tooltip>
             <Menu

@@ -4,20 +4,15 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"simple_bank/constants"
 	"simple_bank/pkg/token"
 	"strings"
-)
-
-const (
-	AuthorizationHeaderKey  = "Authorization"
-	AuthorizationHeaderType = "bearer"
-	AuthorizationPayloadKey = "authorizationPayloadKey"
 )
 
 func AuthWebTokenMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// 获取AuthorizationHeader头这个key的值
-		header := ctx.GetHeader(AuthorizationHeaderKey)
+		header := ctx.GetHeader(constants.AuthorizationHeaderKey)
 		if header == "" || len(header) == 0 {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": errors.New("未提供 authorization 标头"),
@@ -34,7 +29,7 @@ func AuthWebTokenMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 		}
 
 		// 判断切片是否为服务器支持的授权类型
-		if strings.ToLower(fields[0]) != AuthorizationHeaderType {
+		if strings.ToLower(fields[0]) != constants.AuthorizationHeaderType {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": errors.New("服务器不支持的授权类型"),
 			})
@@ -48,7 +43,7 @@ func AuthWebTokenMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 				"error": err.Error(),
 			})
 		}
-		ctx.Set(AuthorizationPayloadKey, payload)
+		ctx.Set(constants.AuthorizationPayloadKey, payload)
 		ctx.Next()
 	}
 }

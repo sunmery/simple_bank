@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
+	"simple_bank/constants"
 	"simple_bank/middleware"
 	"simple_bank/pkg/token"
 	"testing"
@@ -25,7 +26,7 @@ func addMiddleware(
 	require.NotEmpty(t, tokenString)
 
 	authorizationHeader := fmt.Sprintf("%s %s", authWebTokenType, tokenString)
-	request.Header.Set(middleware.AuthorizationHeaderKey, authorizationHeader)
+	request.Header.Set(constants.AuthorizationHeaderKey, authorizationHeader)
 }
 
 func TestAuthMiddleware(t *testing.T) {
@@ -37,7 +38,7 @@ func TestAuthMiddleware(t *testing.T) {
 		{
 			name: "OK",
 			setupAuth: func(t *testing.T, req *http.Request, tokenMaker token.Maker) {
-				addMiddleware(t, req, middleware.AuthorizationHeaderType, tokenMaker, "user", time.Minute)
+				addMiddleware(t, req, constants.AuthorizationHeaderType, tokenMaker, "user", time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -65,7 +66,7 @@ func TestAuthMiddleware(t *testing.T) {
 		{
 			name: "令牌过期",
 			setupAuth: func(t *testing.T, req *http.Request, tokenMaker token.Maker) {
-				addMiddleware(t, req, middleware.AuthorizationHeaderType, tokenMaker, "user", -time.Minute)
+				addMiddleware(t, req, constants.AuthorizationHeaderType, tokenMaker, "user", -time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, recorder.Code)

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"simple_bank/constants"
+	"simple_bank/pkg/token"
 
 	"github.com/jackc/pgx/v5/pgconn"
 
@@ -13,6 +15,7 @@ import (
 	db "simple_bank/db/sqlc"
 )
 
+// 由用户创建的账户
 func (s *Server) createAccount(ctx *gin.Context) {
 	type createAccountRequest struct {
 		Owner    string `json:"owner" binding:"required"`
@@ -23,8 +26,11 @@ func (s *Server) createAccount(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	authPayload := ctx.MustGet(constants.AuthorizationPayloadKey).(*token.Payload)
+	fmt.Println("authPayload", authPayload)
 	arg := db.CreateAccountParams{
-		Owner:    req.Owner,
+		Owner:    authPayload.Username,
 		Balance:  0,
 		Currency: req.Currency,
 	}
@@ -55,10 +61,10 @@ func (s *Server) createAccount(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, account)
 }
 
-// 查询用户
+// 查询用户的账户
 func (s *Server) getAccount(ctx *gin.Context) {
 	type getAccountRequest struct {
-		ID int64 `form:"id" uri:"id" binding:"required,gte=1"`
+		ID int64 `uri:"id" binding:"required,gte=1"`
 	}
 	var req getAccountRequest
 	// 绑定id到结构体
@@ -80,6 +86,7 @@ func (s *Server) getAccount(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, account)
 }
 
+// 列出用户所有的账户
 func (s *Server) listAccount(ctx *gin.Context) {
 	type listAccountRequest struct {
 		PageID   uint32 `form:"page_id" binding:"required,gte=1"`

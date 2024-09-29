@@ -1,12 +1,10 @@
 package pkg
 
-import (
-	"simple_bank/constant"
-)
+import "simple_bank/constants"
 
 func IsSupportedCurrency(currency string) bool {
 	switch currency {
-	case constant.CNY, constant.USD, constant.CAD:
+	case constants.CNY, constants.USD, constants.CAD:
 		return true
 	}
 	return false

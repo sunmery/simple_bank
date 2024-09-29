@@ -25,7 +25,10 @@ const getUser = async (username: string, password: string) => {
     const data: LoginResponse = await res.json();
     return data;
   } catch (error) {
-    throw new Error(error);
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error(String(error));
   }
 };
 

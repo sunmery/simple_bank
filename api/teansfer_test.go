@@ -6,9 +6,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"simple_bank/constants"
 	"testing"
-
-	"simple_bank/constant"
 
 	"simple_bank/pkg"
 
@@ -61,8 +60,8 @@ func TestTransferAPI(t *testing.T) {
 	account1 := randomTransferAccount(t)
 	account2 := randomTransferAccount(t)
 	amount := int64(10)
-	account1.Currency = constant.CNY
-	account2.Currency = constant.CNY
+	account1.Currency = constants.CNY
+	account2.Currency = constants.CNY
 
 	// transfer := db.CreateTransferParams{
 	// 	FromAccountID: account1.ID,
@@ -82,7 +81,7 @@ func TestTransferAPI(t *testing.T) {
 				"fromAccountID": account1.ID,
 				"toAccountID":   account2.ID,
 				"amount":        amount,
-				"currency":      constant.CNY,
+				"currency":      constants.CNY,
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.
@@ -117,7 +116,7 @@ func TestTransferAPI(t *testing.T) {
 				"fromAccountID": account1.ID,
 				"toAccountID":   account2.ID,
 				"amount":        amount,
-				"currency":      constant.CAD,
+				"currency":      constants.CAD,
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.
